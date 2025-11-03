@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Users, 
-  UserPlus, 
+  Users,
   ShoppingCart, 
   BarChart3, 
   Settings, 
@@ -26,7 +25,7 @@ export default function Navigation() {
     <nav className="fixed left-0 top-0 h-full w-16 bg-white border-r border-gray-200 shadow-sm z-50">
       <div className="flex flex-col items-center py-6 space-y-4">
         {/* Logo */}
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+        <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center mb-4">
           <Home className="w-5 h-5 text-white" />
         </div>
         
@@ -54,7 +53,7 @@ export default function Navigation() {
               
               {/* Active indicator */}
               {isActive && (
-                <div className="absolute -right-4 w-1 h-6 bg-blue-600 rounded-l-full"></div>
+                <div className="absolute -right-4 w-1 h-6 bg-black rounded-l-full"></div>
               )}
             </Link>
           );
