@@ -9,12 +9,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Navigation />
-        <Routes>
-          {ROUTES.map(({ path, component: Component }) => (
-            <Route key={path} path={path} element={<Component />} />
-          ))}
-        </Routes>
+        <div className="flex">
+          <Navigation />
+          <main className="flex-1 ml-16">
+            <Routes>
+              {ROUTES.map(({ path, component: Component }) => (
+                <Route key={path} path={path} element={<Component />} />
+              ))}
+            </Routes>
+          </main>
+        </div>
       </BrowserRouter>
     </QueryClientProvider>
   );
