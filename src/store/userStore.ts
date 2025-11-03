@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useNotificationStore } from './notificationStore';
 
 export interface User {
   name: string;
@@ -22,15 +23,23 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       users: [],
-      addUser: (user) => set((state) => ({ users: [...state.users, user] })),
-      updateUser: (index, user) =>
+      addUser: (user) => {
+        set((state) => ({ users: [...state.users, user] }));
+        useNotificationStore.getState().addNotification('add', `User ${user.name} added successfully`);
+      },
+      updateUser: (index, user) => {
         set((state) => ({
           users: state.users.map((u, i) => (i === index ? user : u)),
-        })),
-      deleteUser: (index) =>
+        }));
+        useNotificationStore.getState().addNotification('update', `User ${user.name} updated successfully`);
+      },
+      deleteUser: (index) => {
+        const userName = useUserStore.getState().users[index]?.name || 'User';
         set((state) => ({
           users: state.users.filter((_, i) => i !== index),
-        })),
+        }));
+        useNotificationStore.getState().addNotification('delete', `User ${userName} deleted successfully`);
+      },
     }),
     {
       name: 'user-storage',

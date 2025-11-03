@@ -8,6 +8,7 @@ import {
   Calendar,
   FileText
 } from 'lucide-react';
+import { useNotificationStore } from '../store/notificationStore';
 
 const NAV_ITEMS = [
   { path: '/', icon: ShoppingCart, label: 'Cart Items' },
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
 
 export default function Navigation() {
   const location = useLocation();
+  const { unreadCount } = useNotificationStore();
 
   return (
     <nav className="fixed left-0 top-0 h-full w-16 bg-white border-r border-gray-200 shadow-sm z-50">
@@ -44,6 +46,13 @@ export default function Navigation() {
               title={label}
             >
               <Icon className="w-5 h-5" />
+              
+              {/* Notification indicator for Dashboard */}
+              {path === '/dashboard' && unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
               
               {/* Tooltip */}
               <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">

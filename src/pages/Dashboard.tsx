@@ -13,7 +13,10 @@ import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCarts } from '@/apis/cart';
 import { useUserStore } from '@/store/userStore';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import NotificationPanel from '@/components/NotificationPanel';
+import NotificationPopup from '@/components/NotificationPopup';
+import NotificationDemo from '@/components/NotificationDemo';
 
 const StatCard = ({ title, value, icon: Icon, trend, color }: {
   title: string;
@@ -140,93 +143,17 @@ export default function Dashboard() {
   });
   const { users } = useUserStore();
   const [showDateNotification, setShowDateNotification] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
 
   const handleTodayClick = () => {
     setShowDateNotification(true);
     setTimeout(() => setShowDateNotification(false), 3000);
   };
 
-  const handleNotificationClick = () => {
-    setShowNotifications(!showNotifications);
-    setHasNewNotifications(false);
-  };
-
-  // Auto-refresh notifications every 2 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLastUpdateTime(new Date());
-      setHasNewNotifications(true);
-    }, 120000); // 2 minutes
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const notifications = useMemo(() => {
-    const now = new Date();
-    const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
-    
-    const notificationList = [];
-    
-    // Recent cart additions (last 2 minutes simulation)
-    cartData.slice(0, 3).forEach((item, index) => {
-      notificationList.push({
-        id: `cart-${index}`,
-        type: 'cart',
-        title: 'New Cart Item',
-        message: `${item.title} added - $${item.price}`,
-        time: new Date(now.getTime() - (index + 1) * 30000).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        icon: '🛒',
-        color: 'bg-blue-100 text-blue-600'
-      });
-    });
-    
-    // Recent user activities
-    users.slice(0, 2).forEach((user, index) => {
-      notificationList.push({
-        id: `user-${index}`,
-        type: 'user',
-        title: user.isActive ? 'User Active' : 'User Inactive',
-        message: `${user.name} from ${user.department}`,
-        time: new Date(now.getTime() - (index + 4) * 45000).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        icon: user.isActive ? '✅' : '❌',
-        color: user.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-      });
-    });
-    
-    // System notifications
-    notificationList.push({
-      id: 'system-1',
-      type: 'system',
-      title: 'System Update',
-      message: `Dashboard refreshed at ${lastUpdateTime.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })}`,
-      time: lastUpdateTime.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      icon: '🔄',
-      color: 'bg-purple-100 text-purple-600'
-    });
-    
-    return notificationList.slice(0, 5); // Show last 5 notifications
-  }, [cartData, users, lastUpdateTime]);
-
   const stats = useMemo(() => {
     const totalItems = cartData.length;
     const totalUsers = users.length;
     const activeUsers = users.filter(user => user.isActive).length;
-    const totalRevenue = cartData.reduce((sum, item) => sum + item.total, 0);
+    const totalRevenue = cartData.reduce((sum: number, item: any) => sum + item.total, 0);
     const avgOrderValue = totalItems > 0 ? totalRevenue / totalItems : 0;
 
     return {
@@ -239,10 +166,10 @@ export default function Dashboard() {
   }, [cartData, users]);
 
   const recentActivity = useMemo(() => {
-    const activities = [];
+    const activities: any[] = [];
     
     // Recent cart additions
-    cartData.slice(0, 2).forEach(item => {
+    cartData.slice(0, 2).forEach((item: any) => {
       activities.push({
         user: item.title,
         action: `Added to cart - $${item.price}`,
@@ -252,7 +179,7 @@ export default function Dashboard() {
     });
     
     // Recent user registrations
-    users.slice(0, 2).forEach(user => {
+    users.slice(0, 2).forEach((user: any) => {
       activities.push({
         user: user.name,
         action: `${user.isActive ? 'Active user' : 'Inactive user'} - ${user.department}`,
@@ -289,12 +216,7 @@ export default function Dashboard() {
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
-            <Button variant="outline" size="sm" onClick={handleNotificationClick} className="relative">
-              <Bell className="h-4 w-4" />
-              {hasNewNotifications && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              )}
-            </Button>
+            <NotificationPanel />
             <Button variant="outline" size="sm" onClick={handleTodayClick}>
               <Calendar className="h-4 w-4 mr-2" />
               Today
@@ -335,15 +257,23 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Demo Section */}
+      <div className="mb-6">
+        <NotificationDemo />
+      </div>
+
       {/* Charts and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ActivityChart cartData={cartData} users={users} />
         <RecentActivity activities={recentActivity} />
       </div>
 
+      {/* Notifications */}
+      <NotificationPopup />
+      
       {/* Date Notification Popup */}
       {showDateNotification && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
+        <div className="fixed top-4 right-4 z-40 animate-in slide-in-from-top-2 duration-300">
           <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[280px]">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -366,61 +296,6 @@ export default function Dashboard() {
                   })}
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notifications Popup */}
-      {showNotifications && (
-        <div className="fixed top-16 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 max-h-96 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-semibold text-gray-900">Notifications</h3>
-              <button
-                onClick={() => setShowNotifications(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Notifications List */}
-            <div className="max-h-80 overflow-y-auto">
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <div key={notification.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.color} flex-shrink-0`}>
-                        <span className="text-sm">{notification.icon}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                        <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
-                        <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-gray-500">
-                  <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No notifications</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Footer */}
-            <div className="p-3 bg-gray-50 text-center">
-              <p className="text-xs text-gray-500">
-                Last updated: {lastUpdateTime.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
             </div>
           </div>
         </div>
