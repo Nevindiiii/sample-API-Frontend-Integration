@@ -31,6 +31,8 @@ import { Loading } from '@/components/ui/loading';
 import { DataTablePagination } from '@/components/DataTablePagination';
 
 import { DataTableViewOptions } from '@/components/DataTableViewOptions';
+import { CartBulkActions } from '@/components/CartBulkActions';
+import { Cart } from './columns';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -75,25 +77,46 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const selectedCarts = new Set(selectedRows.map(row => row.index));
+
+  const handleBulkDelete = () => {
+    console.log('Bulk delete cart items:', selectedRows.map(row => row.original));
+    setRowSelection({});
+  };
+
+  const handleCopyCartIds = () => {
+    const cartIds = selectedRows.map(row => (row.original as Cart).cartId).join(', ');
+    navigator.clipboard.writeText(cartIds);
+    console.log('Copied cart IDs:', cartIds);
+  };
+
   return (
     <div>
-      <div className="flex items-center py-4">
-        <SearchBox
-          placeholder="Search by name..."
-          value={
-            (table.getColumn('firstName')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(value) => {
-            setSearchLoading(true);
-            setTimeout(() => {
-              table.getColumn('firstName')?.setFilterValue(value);
-              setSearchLoading(false);
-            }, 300);
-          }}
-          loading={searchLoading}
-          className="max-w-sm"
-        />
-
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center gap-4">
+          <SearchBox
+            placeholder="Search by product title..."
+            value={
+              (table.getColumn('title')?.getFilterValue() as string) ?? ''
+            }
+            onChange={(value) => {
+              setSearchLoading(true);
+              setTimeout(() => {
+                table.getColumn('title')?.setFilterValue(value);
+                setSearchLoading(false);
+              }, 300);
+            }}
+            loading={searchLoading}
+            className="max-w-sm"
+          />
+          <CartBulkActions
+            selectedCarts={selectedCarts}
+            carts={data as Cart[]}
+            onBulkDelete={handleBulkDelete}
+            onCopyCartIds={handleCopyCartIds}
+          />
+        </div>
         <DataTableViewOptions table={table} />
       </div>
       <div className="relative h-[calc(100vh-280px)] overflow-hidden overflow-y-auto rounded-md border">

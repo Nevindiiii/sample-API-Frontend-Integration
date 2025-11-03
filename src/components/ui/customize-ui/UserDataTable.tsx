@@ -11,13 +11,23 @@ import { Loading } from '@/components/ui/loading';
 import { flexRender, Table as TableType } from '@tanstack/react-table';
 import { User } from '@/store/userStore';
 import { DataTablePagination } from '@/components/DataTablePagination';
+import { UserViewDialog } from '@/components/user/UserViewDialog';
 
 interface Props {
   table: TableType<User>;
   searchLoading: boolean;
+  viewingUser?: User | null;
+  viewDialogOpen?: boolean;
+  setViewDialogOpen?: (open: boolean) => void;
 }
 
-export default function UserDataTable({ table, searchLoading }: Props) {
+export default function UserDataTable({ 
+  table, 
+  searchLoading, 
+  viewingUser, 
+  viewDialogOpen, 
+  setViewDialogOpen 
+}: Props) {
   return (
     <div className="relative mt-6 px-6">
       {searchLoading && (
@@ -80,6 +90,14 @@ export default function UserDataTable({ table, searchLoading }: Props) {
       <div className="py-4">
         <DataTablePagination table={table} />
       </div>
+      
+      {viewingUser && viewDialogOpen && setViewDialogOpen && (
+        <UserViewDialog 
+          user={viewingUser} 
+          open={viewDialogOpen} 
+          onOpenChange={setViewDialogOpen} 
+        />
+      )}
     </div>
   );
 }

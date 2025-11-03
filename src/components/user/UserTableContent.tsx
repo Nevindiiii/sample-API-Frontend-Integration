@@ -31,7 +31,13 @@ export function UserTableContent({ userTable, state, onBulkDelete, onCopyEmails 
         onCopyEmails={onCopyEmails}
         table={userTable.table}
       />
-      <UserDataTable table={userTable.table} searchLoading={state.searchLoading} />
+      <UserDataTable 
+        table={userTable.table} 
+        searchLoading={state.searchLoading}
+        viewingUser={userTable.viewingUser}
+        viewDialogOpen={userTable.viewDialogOpen}
+        setViewDialogOpen={userTable.setViewDialogOpen}
+      />
     </TableContainer>
   );
 }

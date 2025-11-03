@@ -1,16 +1,8 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table-column-header';
 
@@ -23,7 +15,20 @@ export type User = {
   phone: string;
 };
 
-export const columns: ColumnDef<User>[] = [
+export type Cart = {
+  id: number;
+  title: string;
+  price: number;
+  quantity: number;
+  total: number;
+  discountPercentage: number;
+  discountedTotal: number;
+  thumbnail: string;
+  cartId: number;
+  userId: number;
+};
+
+export const getColumns = (onViewDetails: (cart: Cart) => void): ColumnDef<Cart>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -47,61 +52,74 @@ export const columns: ColumnDef<User>[] = [
 
   {
     id: 'actions',
+    header: 'Actions',
     cell: ({ row }) => {
-      const user = row.original;
+      const cart = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id.toString())}
-            >
-              Copy user ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View user</DropdownMenuItem>
-            <DropdownMenuItem>View details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => onViewDetails(cart)}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
       );
     },
   },
 
   {
-    accessorKey: 'firstName',
+    accessorKey: 'id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="First Name" />
+      <DataTableColumnHeader column={column} title="Product ID" />
     ),
   },
   {
-    accessorKey: 'lastName',
+    accessorKey: 'thumbnail',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Last Name" />
+      <DataTableColumnHeader column={column} title="Image" />
+    ),
+    cell: ({ row }) => (
+      <img 
+        src={row.getValue('thumbnail')} 
+        alt={row.getValue('title')} 
+        className="h-12 w-12 rounded object-cover" 
+      />
     ),
   },
   {
-    accessorKey: 'email',
+    accessorKey: 'title',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
+      <DataTableColumnHeader column={column} title="Title" />
     ),
   },
   {
-    accessorKey: 'age',
+    accessorKey: 'price',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Age" />
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
+    cell: ({ row }) => `$${row.getValue('price')}`,
+  },
+  {
+    accessorKey: 'quantity',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Quantity" />
     ),
   },
   {
-    accessorKey: 'phone',
+    accessorKey: 'total',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phone" />
+      <DataTableColumnHeader column={column} title="Total" />
     ),
+    cell: ({ row }) => `$${row.getValue('total')}`,
+  },
+  {
+    accessorKey: 'discountPercentage',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Discount %" />
+    ),
+    cell: ({ row }) => `${row.getValue('discountPercentage')}%`,
   },
 ];
+
+export const columns: ColumnDef<Cart>[] = getColumns(() => {});

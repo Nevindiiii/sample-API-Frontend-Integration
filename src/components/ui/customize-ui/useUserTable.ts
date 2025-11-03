@@ -17,6 +17,7 @@ export function useUserTable(searchTerm: string, handleEdit?: (index: number) =>
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -32,7 +33,9 @@ export function useUserTable(searchTerm: string, handleEdit?: (index: number) =>
   };
 
   const defaultHandleView = (index: number) => {
+    console.log('View clicked for user:', users[index]);
     setViewingUser(users[index]);
+    setViewDialogOpen(true);
   };
 
   const columns = useMemo(
@@ -79,5 +82,7 @@ export function useUserTable(searchTerm: string, handleEdit?: (index: number) =>
     handleEdit: defaultHandleEdit, 
     handleDelete: defaultHandleDelete, 
     handleView: defaultHandleView,
+    viewDialogOpen,
+    setViewDialogOpen,
   };
 }
