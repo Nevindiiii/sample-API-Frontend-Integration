@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useNotificationStore } from './notificationStore';
+import * as userApi from '../apis/user';
 
 export interface User {
+  _id?: string;
   name: string;
   email: string;
   gender: string;
@@ -14,35 +15,61 @@ export interface User {
 
 interface UserStore {
   users: User[];
-  addUser: (user: User) => void;
-  updateUser: (index: number, user: User) => void;
-  deleteUser: (index: number) => void;
+  loading: boolean;
+  fetchUsers: () => Promise<void>;
+  addUser: (user: User) => Promise<void>;
+  updateUser: (id: string, user: User) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
 }
 
-export const useUserStore = create<UserStore>()(
-  persist(
-    (set) => ({
-      users: [],
-      addUser: (user) => {
-        set((state) => ({ users: [...state.users, user] }));
-        useNotificationStore.getState().addNotification('add', `User ${user.name} added successfully`);
-      },
-      updateUser: (index, user) => {
-        set((state) => ({
-          users: state.users.map((u, i) => (i === index ? user : u)),
-        }));
-        useNotificationStore.getState().addNotification('update', `User ${user.name} updated successfully`);
-      },
-      deleteUser: (index) => {
-        const userName = useUserStore.getState().users[index]?.name || 'User';
-        set((state) => ({
-          users: state.users.filter((_, i) => i !== index),
-        }));
-        useNotificationStore.getState().addNotification('delete', `User ${userName} deleted successfully`);
-      },
-    }),
-    {
-      name: 'user-storage',
+export const useUserStore = create<UserStore>()((set, get) => ({
+  users: [],
+  loading: false,
+  
+  fetchUsers: async () => {
+    set({ loading: true });
+    try {
+      const users = await userApi.fetchUsers();
+      set({ users, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      console.error('Failed to fetch users:', error);
     }
-  )
-);
+  },
+  
+  addUser: async (user) => {
+    try {
+      const newUser = await userApi.addUser(user);
+      set((state) => ({ users: [...state.users, newUser] }));
+      useNotificationStore.getState().addNotification('add', `User ${user.name} added successfully`);
+    } catch (error) {
+      console.error('Failed to add user:', error);
+    }
+  },
+  
+  updateUser: async (id, user) => {
+    try {
+      const updatedUser = await userApi.updateUser(id, user);
+      set((state) => ({
+        users: state.users.map((u) => (u._id === id ? { ...updatedUser, _id: id } : u)),
+      }));
+      useNotificationStore.getState().addNotification('update', `User ${user.name} updated successfully`);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  },
+  
+  deleteUser: async (id) => {
+    const user = get().users.find(u => u._id === id);
+    const userName = user?.name || 'User';
+    try {
+      await userApi.deleteUser(id);
+      set((state) => ({
+        users: state.users.filter((u) => u._id !== id),
+      }));
+      useNotificationStore.getState().addNotification('delete', `User ${userName} deleted successfully`);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    }
+  },
+}))

@@ -1,3 +1,5 @@
+import { addUser, updateUser, deleteUser } from '@/apis/user';
+
 export function useUserActions(userTable: any, state: any, showMessage: any) {
   const handleEdit = (index: number) => {
     userTable.setEditingIndex(index);
@@ -16,13 +18,16 @@ export function useUserActions(userTable: any, state: any, showMessage: any) {
     state.setViewDialogOpen(true);
   };
 
-  const handleSubmit = (user: any) => {
+  const handleSubmit = async (user: any) => {
     try {
       if (userTable.editingIndex !== null) {
+        const existingUser = userTable.users[userTable.editingIndex];
+        await updateUser(existingUser._id, user);
         userTable.updateUser(userTable.editingIndex, user);
         showMessage('success', 'User updated successfully');
       } else {
-        userTable.addUser(user);
+        const newUser = await addUser(user);
+        userTable.addUser(newUser);
         showMessage('success', 'User added successfully');
       }
       state.setDialogOpen(false);
@@ -46,24 +51,30 @@ export function useUserActions(userTable: any, state: any, showMessage: any) {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (userTable.userToDelete !== null) {
       const user = userTable.users[userTable.userToDelete];
-      state.setDeletedUser(user);
-      userTable.deleteUser(userTable.userToDelete);
-      state.setDeleteDialogOpen(false);
-      state.setShowUndoNotification(true);
-      showMessage('success', 'User deleted successfully');
+      try {
+        await deleteUser(user._id);
+        state.setDeletedUser(user);
+        userTable.deleteUser(userTable.userToDelete);
+        state.setDeleteDialogOpen(false);
+        state.setShowUndoNotification(true);
+        showMessage('success', 'User deleted successfully');
 
-      let countdown = 5;
-      state.setUndoCountdown(countdown);
-      const interval = setInterval(() => {
-        state.setUndoCountdown(--countdown);
-        if (countdown === 0) {
-          clearInterval(interval);
-          state.setShowUndoNotification(false);
-        }
-      }, 1000);
+        let countdown = 5;
+        state.setUndoCountdown(countdown);
+        const interval = setInterval(() => {
+          state.setUndoCountdown(--countdown);
+          if (countdown === 0) {
+            clearInterval(interval);
+            state.setShowUndoNotification(false);
+          }
+        }, 1000);
+      } catch {
+        showMessage('error', 'Failed to delete user');
+        state.setDeleteDialogOpen(false);
+      }
     }
   };
 

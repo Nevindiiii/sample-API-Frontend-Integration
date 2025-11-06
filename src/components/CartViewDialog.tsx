@@ -203,7 +203,7 @@ export function CartViewDialog({
   );
 }
 
-// Demo Component
+
 export default function Demo() {
   const [open, setOpen] = useState(true);
 

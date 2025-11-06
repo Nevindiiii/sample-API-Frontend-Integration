@@ -1,9 +1,11 @@
-import { apiClient } from './axiosConfig';
-import { User } from '../app/payments/columns';
+import axios from 'axios';
+import { User } from '../store/userStore';
+
+const API_BASE = 'http://localhost:5000/api';
 
 export async function fetchUsers(): Promise<User[]> {
   try {
-    const response = await apiClient.get('/users');
+    const response = await axios.get(`${API_BASE}/users`);
     return response.data.users;
   } catch (error) {
     console.error('Fetch users error:', error);
@@ -11,9 +13,9 @@ export async function fetchUsers(): Promise<User[]> {
   }
 }
 
-export async function addUser(user: Omit<User, 'id'>): Promise<User> {
+export async function addUser(user: User): Promise<User> {
   try {
-    const response = await apiClient.post('/users', user);
+    const response = await axios.post(`${API_BASE}/users`, user);
     return response.data;
   } catch (error) {
     console.error('Add user error:', error);
@@ -21,9 +23,9 @@ export async function addUser(user: Omit<User, 'id'>): Promise<User> {
   }
 }
 
-export async function updateUser(id: number, user: Partial<User>): Promise<User> {
+export async function updateUser(id: string, user: Partial<User>): Promise<User> {
   try {
-    const response = await apiClient.put(`/users/${id}`, user);
+    const response = await axios.put(`${API_BASE}/users/${id}`, user);
     return response.data;
   } catch (error) {
     console.error('Update user error:', error);
@@ -31,9 +33,9 @@ export async function updateUser(id: number, user: Partial<User>): Promise<User>
   }
 }
 
-export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: string): Promise<void> {
   try {
-    await apiClient.delete(`/users/${id}`);
+    await axios.delete(`${API_BASE}/users/${id}`);
   } catch (error) {
     console.error('Delete user error:', error);
     throw new Error('Unable to delete user');
