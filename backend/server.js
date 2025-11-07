@@ -67,77 +67,19 @@ app.put('/api/users/:id', async (req, res) => {
 // Delete user
 app.delete('/api/users/:id', async (req, res) => {
   try {
-    await db
+    console.log('DELETE request for user ID:', req.params.id);
+    const result = await db
       .collection('users')
       .deleteOne({ _id: new ObjectId(req.params.id) });
+    console.log('Delete result:', result);
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     res.json({ message: 'User deleted' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete user' });
+    console.error('Delete error:', error);
+    res.status(500).json({ error: 'Failed to delete user', details: error.message });
   }
 });
 
-// -------------------- CRUD NOTIFICATIONS -------------------- //
 
-// Fetch all notifications
-app.get('/api/notifications', async (req, res) => {
-  try {
-    const notifications = await db
-      .collection('notifications')
-      .find()
-      .sort({ timestamp: -1 })
-      .toArray();
-    res.json({ notifications });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch notifications' });
-  }
-});
-
-// Add notification
-app.post('/api/notifications', async (req, res) => {
-  try {
-    const result = await db.collection('notifications').insertOne(req.body);
-    res.json({ ...req.body, _id: result.insertedId });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to add notification' });
-  }
-});
-
-// Update notification (mark as read)
-app.put('/api/notifications/:id', async (req, res) => {
-  try {
-    await db
-      .collection('notifications')
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
-    res.json({ ...req.body, _id: req.params.id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to update notification' });
-  }
-});
-
-// Delete notification
-app.delete('/api/notifications/:id', async (req, res) => {
-  try {
-    await db
-      .collection('notifications')
-      .deleteOne({ _id: new ObjectId(req.params.id) });
-    res.json({ message: 'Notification deleted' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete notification' });
-  }
-});
-
-// Clear all notifications
-app.delete('/api/notifications', async (req, res) => {
-  try {
-    await db.collection('notifications').deleteMany({});
-    res.json({ message: 'All notifications cleared' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to clear notifications' });
-  }
-});

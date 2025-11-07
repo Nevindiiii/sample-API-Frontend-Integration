@@ -35,9 +35,10 @@ export async function updateUser(id: string, user: Partial<User>): Promise<User>
 
 export async function deleteUser(id: string): Promise<void> {
   try {
-    await axios.delete(`${API_BASE}/users/${id}`);
-  } catch (error) {
-    console.error('Delete user error:', error);
-    throw new Error('Unable to delete user');
+    const response = await axios.delete(`${API_BASE}/users/${id}`);
+    console.log('Delete response:', response.data);
+  } catch (error: any) {
+    console.error('Delete user error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.error || 'Unable to delete user');
   }
 }

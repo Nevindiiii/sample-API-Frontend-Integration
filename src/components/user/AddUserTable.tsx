@@ -5,11 +5,10 @@ import { useTableState } from '@/components/ui/customize-ui/useTableState';
 import { useUserActions } from './hooks/useUserActions';
 import { useNotifications } from './hooks/useNotifications';
 import { UserTableContent } from './UserTableContent';
-import { NotificationContainer } from './NotificationContainer';
 
 export default function AddUserTable() {
   const state = useTableState();
-  const { showMessage } = useNotifications(state);
+  const { showMessage } = useNotifications();
 
   // Create a ref to store handlers
   const handlersRef = useRef<any>(null);
@@ -79,11 +78,6 @@ export default function AddUserTable() {
 
   return (
     <div className="relative min-h-screen">
-      <NotificationContainer
-        state={state}
-        onUndo={handleUndo}
-        onDismiss={() => state.setShowUndoNotification(false)}
-      />
       <UserTableContent
         userTable={userTable}
         state={state}

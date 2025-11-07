@@ -168,9 +168,6 @@ export function UserForm({
 
     onSubmit(userData);
     onOpenChange(false);
-    onSuccess(
-      editingUser ? 'User updated successfully!' : 'User added successfully!'
-    );
   };
 
   return (

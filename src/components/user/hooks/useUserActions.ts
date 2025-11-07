@@ -1,4 +1,4 @@
-import { addUser, updateUser, deleteUser } from '@/apis/user';
+
 
 export function useUserActions(userTable: any, state: any, showMessage: any) {
   const handleEdit = (index: number) => {
@@ -22,13 +22,9 @@ export function useUserActions(userTable: any, state: any, showMessage: any) {
     try {
       if (userTable.editingIndex !== null) {
         const existingUser = userTable.users[userTable.editingIndex];
-        await updateUser(existingUser._id, user);
-        userTable.updateUser(userTable.editingIndex, user);
-        showMessage('success', 'User updated successfully');
+        await userTable.updateUser(existingUser._id, user);
       } else {
-        const newUser = await addUser(user);
-        userTable.addUser(newUser);
-        showMessage('success', 'User added successfully');
+        await userTable.addUser(user);
       }
       state.setDialogOpen(false);
       userTable.setEditingIndex(null);
@@ -55,22 +51,8 @@ export function useUserActions(userTable: any, state: any, showMessage: any) {
     if (userTable.userToDelete !== null) {
       const user = userTable.users[userTable.userToDelete];
       try {
-        await deleteUser(user._id);
-        state.setDeletedUser(user);
-        userTable.deleteUser(userTable.userToDelete);
+        await userTable.deleteUser(user._id);
         state.setDeleteDialogOpen(false);
-        state.setShowUndoNotification(true);
-        showMessage('success', 'User deleted successfully');
-
-        let countdown = 5;
-        state.setUndoCountdown(countdown);
-        const interval = setInterval(() => {
-          state.setUndoCountdown(--countdown);
-          if (countdown === 0) {
-            clearInterval(interval);
-            state.setShowUndoNotification(false);
-          }
-        }, 1000);
       } catch {
         showMessage('error', 'Failed to delete user');
         state.setDeleteDialogOpen(false);

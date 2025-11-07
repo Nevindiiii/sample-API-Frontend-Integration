@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useNotificationStore } from './notificationStore';
+import toast from 'react-hot-toast';
 import * as userApi from '../apis/user';
 
 export interface User {
@@ -41,9 +41,10 @@ export const useUserStore = create<UserStore>()((set, get) => ({
     try {
       const newUser = await userApi.addUser(user);
       set((state) => ({ users: [...state.users, newUser] }));
-      useNotificationStore.getState().addNotification('add', `User ${user.name} added successfully`);
+      toast.success(`User ${user.name} added successfully`);
     } catch (error) {
       console.error('Failed to add user:', error);
+      toast.error('Failed to add user');
     }
   },
   
@@ -53,9 +54,10 @@ export const useUserStore = create<UserStore>()((set, get) => ({
       set((state) => ({
         users: state.users.map((u) => (u._id === id ? { ...updatedUser, _id: id } : u)),
       }));
-      useNotificationStore.getState().addNotification('update', `User ${user.name} updated successfully`);
+      toast.success(`User ${user.name} updated successfully`);
     } catch (error) {
       console.error('Failed to update user:', error);
+      toast.error('Failed to update user');
     }
   },
   
@@ -67,9 +69,10 @@ export const useUserStore = create<UserStore>()((set, get) => ({
       set((state) => ({
         users: state.users.filter((u) => u._id !== id),
       }));
-      useNotificationStore.getState().addNotification('delete', `User ${userName} deleted successfully`);
+      toast.success(`User ${userName} deleted successfully`);
     } catch (error) {
       console.error('Failed to delete user:', error);
+      toast.error('Failed to delete user');
     }
   },
 }))
