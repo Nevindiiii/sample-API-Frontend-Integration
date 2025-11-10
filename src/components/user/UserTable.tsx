@@ -47,6 +47,7 @@ export function UserTable({
     const { key, direction } = sortConfig;
     const aValue = a[key as keyof typeof a];
     const bValue = b[key as keyof typeof b];
+    if (aValue === undefined || bValue === undefined) return 0;
     if (aValue < bValue) return direction === 'asc' ? -1 : 1;
     if (aValue > bValue) return direction === 'asc' ? 1 : -1;
     return 0;

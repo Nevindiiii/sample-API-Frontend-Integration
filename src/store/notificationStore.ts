@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import toast from 'react-hot-toast';
 import * as notificationApi from '../apis/notification';
 import { Notification } from '../apis/notification';
 
@@ -14,7 +13,7 @@ interface NotificationStore {
   clearAllNotifications: () => Promise<void>;
 }
 
-export const useNotificationStore = create<NotificationStore>()((set, get) => ({
+export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
   loading: false,
   
@@ -42,10 +41,6 @@ export const useNotificationStore = create<NotificationStore>()((set, get) => ({
       set((state) => ({
         notifications: [newNotification, ...state.notifications],
       }));
-      
-      if (type === 'add') toast.success(message);
-      else if (type === 'delete') toast.error(message);
-      else toast(message);
     } catch (error) {
       console.error('Failed to add notification:', error);
     }
