@@ -44,11 +44,18 @@ export async function deleteUser(id: string, userName: string, onConfirm?: () =>
   let interval: NodeJS.Timeout;
   
   const handleClick = async () => {
-    if (!confirmed && onConfirm) {
+    if (!confirmed) {
       confirmed = true;
       clearInterval(interval);
       toast.dismiss(confirmToastId);
-      await onConfirm();
+      try {
+        const response = await axios.delete(`${API_BASE}/users/${id}`);
+        handleBackendToast(response.data.toast);
+        if (onConfirm) await onConfirm();
+      } catch (error) {
+        handleApiError(error);
+        throw error;
+      }
     }
   };
   

@@ -6,9 +6,11 @@ import {
   Settings, 
   Home,
   Calendar,
-  FileText
+  FileText,
+  User
 } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
+import { useAuthStore } from '@/store/authStore';
 
 
 const NAV_ITEMS = [
@@ -18,10 +20,12 @@ const NAV_ITEMS = [
   { path: '/calendar', icon: Calendar, label: 'Calendar' },
   { path: '/reports', icon: FileText, label: 'Reports' },
   { path: '/settings', icon: Settings, label: 'Settings' },
+  { path: '/profile', icon: User, label: 'Profile' },
 ];
 
 export default function Navigation() {
   const location = useLocation();
+  const { user } = useAuthStore();
 
   return (
     <nav className="fixed left-0 top-0 h-full w-16 bg-white border-r border-gray-200 shadow-sm z-50">
@@ -48,11 +52,9 @@ export default function Navigation() {
             >
               <Icon className="w-5 h-5" />
               
-
-              
               {/* Tooltip */}
               <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                {label}
+                {label === 'Profile' && user ? user.name : label}
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
               </div>
               
@@ -66,9 +68,7 @@ export default function Navigation() {
       </div>
       
       {/* Notification Panel at bottom */}
-      <div className="mb-4">
-        <NotificationPanel />
-      </div>
+      <NotificationPanel />
       </div>
     </nav>
   );
